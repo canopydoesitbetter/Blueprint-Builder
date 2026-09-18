@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('tube lengths are entered and displayed in inches only', async ({ page }) => {
-  await expect(page.getByText('Blueprint Builder', { exact: true })).toBeVisible();
+  await expect(page.locator('#desktop-brand').getByText('Blueprint Builder', { exact: true })).toBeVisible();
   await expect(page.locator('#bp-width')).toHaveValue('20');
   await expect(page.locator('#bp-depth')).toHaveValue('20');
   await expect(page.locator('#bp-height')).toHaveValue('10');
