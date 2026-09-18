@@ -1,17 +1,264 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Blueprint Builder Prototype</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0f14">
+<title>Blueprint Builder Prototype</title>
 <style>
-:root{--bg:#0f1318;--panel:#171d24;--panel2:#202833;--line:#354252;--text:#eef4fb;--muted:#9aa9b8;--accent:#5ec8ff;--danger:#ff6b78;--grid1:#25303b;--grid3:#2d3a47;--grid12:#42566a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;height:100vh;overflow:hidden}.app{display:grid;grid-template-columns:330px 1fr;height:100vh}.sidebar{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:16px}.brand{font-weight:800;font-size:20px}.sub,.hint,.status{color:var(--muted);font-size:12px}.sub{margin:2px 0 14px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}.card h3{margin:0 0 10px;font-size:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.field input,.field select,button{width:100%;background:#111820;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit}.field input:focus,.field select:focus{outline:2px solid #5ec8ff55;border-color:var(--accent)}button{cursor:pointer;font-weight:700}button.primary{background:linear-gradient(180deg,#1688c2,#0f6f9d);border-color:#249bd0}button.danger{border-color:#7f3940;color:#ffd6da}.parts{display:flex;flex-direction:column;gap:8px}.part{background:#111820;border:1px solid var(--line);border-radius:11px;padding:10px;cursor:grab}.part.disabled{opacity:.45}.partTop{display:flex;justify-content:space-between;gap:8px;font-weight:800;font-size:13px}.partMeta{font-size:11px;color:var(--muted);margin-top:3px}.partActions{margin-top:8px}.partActions button{padding:6px 8px;font-size:11px}.main{min-width:0;display:flex;flex-direction:column;height:100vh}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#141a21;border-bottom:1px solid var(--line)}.tabs,.toolGroup{display:flex;gap:6px;align-items:center}.tabs button,.toolGroup button{width:auto;padding:8px 10px}.tabs button.active{background:#163d51;border-color:#4aa8d2}.toolGroup .field{min-width:132px}.toolGroup input,.toolGroup select{padding:7px 8px}.spacer{flex:1}.canvasWrap{position:relative;flex:1;min-height:0;background:#0b0f14;overflow:hidden}.canvasWrap.dragover{box-shadow:inset 0 0 0 2px var(--accent)}svg{width:100%;height:100%;display:block;touch-action:none;user-select:none}.floating,.selection{position:absolute;bottom:12px;display:flex;gap:6px;background:#111820e8;border:1px solid var(--line);padding:7px;border-radius:12px}.floating{left:12px}.selection{right:12px;display:none;align-items:center}.selection.show{display:flex}.floating button,.selection button{width:auto;padding:7px 10px}.toast{position:absolute;top:12px;right:12px;background:#111820ee;border:1px solid var(--line);padding:9px 12px;border-radius:10px;font-size:12px;display:none;max-width:320px}.toast.show{display:block}.mobileDrawerBtn{display:none}@media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:20;left:0;top:0;bottom:0;width:min(88vw,360px);transform:translateX(-102%);transition:.2s;box-shadow:20px 0 60px #0008}.sidebar.open{transform:none}.mobileDrawerBtn{display:inline-block;width:auto}.status{display:none}.selection{left:12px;right:auto;bottom:58px;max-width:calc(100vw - 24px);flex-wrap:wrap}}
-</style></head>
-<body><div class="app"><aside class="sidebar" id="sidebar"><div class="brand">Blueprint Builder</div><div class="sub">Standalone synchronized-view prototype</div>
-<section class="card"><h3>Blueprint Setup</h3><div class="grid3"><div class="field"><label>Width (ft)</label><input id="bp-width" type="number" min="1" value="20"></div><div class="field"><label>Depth (ft)</label><input id="bp-depth" type="number" min="1" value="20"></div><div class="field"><label>Height (ft)</label><input id="bp-height" type="number" min="1" value="10"></div></div><button class="primary" id="apply-blueprint" style="margin-top:8px">Apply Blueprint Size</button><div class="hint">One shared X/Y/Z model. Every view uses real inches.</div></section>
-<section class="card"><h3>Tube Builder</h3><div class="field"><label>Tube size</label><select id="profile"><option value="2x2">2" × 2" × 1/8" wall</option><option value="3x3">3" × 3" × 1/8" wall</option><option value="2x6">2" × 6" × 1/8" wall</option></select></div><div class="grid2" style="margin-top:8px"><div class="field"><label for="part-length">Length (in)</label><input id="part-length" type="number" min="0.01" step="0.125" value="72" inputmode="decimal"></div><div class="field"><label>Quantity</label><input id="part-qty" type="number" min="1" value="4"></div></div><button class="primary" id="add-part" style="margin-top:8px">Add to Parts</button></section>
-<section class="card"><h3>Parts Drawer</h3><div class="parts" id="parts-list"></div><div class="hint">Desktop: drag a part to the grid. Touch: tap Place, then tap the grid.</div></section></aside>
-<main class="main"><div class="toolbar"><button class="mobileDrawerBtn" id="drawer-btn">Parts</button><div class="tabs" id="view-tabs"><button class="active" data-view="top">Top</button><button data-view="wallA">Wall A</button><button data-view="wallB">Wall B</button><button data-view="wallC">Wall C</button><button data-view="wallD">Wall D</button></div><div class="toolGroup"><button id="rotate-view-right" aria-label="Rotate Right">Rotate Right ↻</button></div><div class="toolGroup"><div class="field"><label id="plane-label">Elevation</label><input id="placement-plane" value="0\""></div><div class="field"><label>Placement Direction</label><select id="placement-axis"><option value="h">Horizontal</option><option value="v">Vertical</option></select></div></div><div class="spacer"></div><div class="status" id="view-status"></div></div>
-<div class="canvasWrap" id="canvas-wrap"><svg id="blueprint" xmlns="http://www.w3.org/2000/svg" aria-label="Blueprint drafting surface"><defs><pattern id="grid1" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0L0 0 0 1" fill="none" stroke="var(--grid1)" stroke-width=".08"/></pattern><pattern id="grid3" width="3" height="3" patternUnits="userSpaceOnUse"><path d="M3 0L0 0 0 3" fill="none" stroke="var(--grid3)" stroke-width=".14"/></pattern><pattern id="grid12" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M12 0L0 0 0 12" fill="none" stroke="var(--grid12)" stroke-width=".22"/></pattern></defs><g id="scene"></g></svg><div class="floating"><button id="zoom-out" aria-label="Zoom Out">−</button><button id="zoom-label">100%</button><button id="zoom-in" aria-label="Zoom In">+</button><button id="fit-view">Fit</button></div><div class="selection" id="selection-bar"><span id="selection-label" class="status"></span><button id="rotate-member">Rotate 90°</button><button id="rotate-face">Rotate Face 90°</button><button class="danger" id="delete-member">Delete</button></div><div class="toast" id="toast"></div></div></main></div>
-<script>(()=>{'use strict';
+:root{
+  --bg:#0b0f14;--panel:#141b23;--panel2:#1b2530;--panel3:#10171f;--line:#314151;
+  --text:#f4f8fc;--muted:#93a4b5;--accent:#5ec8ff;--accent2:#1388c2;--danger:#ff6b78;
+  --grid1:#202c37;--grid3:#2a3947;--grid12:#42596e;--shadow:0 18px 60px #0009;
+  --radius:16px;--tap:46px;
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;background:var(--bg);color:var(--text);overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100dvh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;
+}
+button,input,select{font:inherit}
+button{
+  min-height:var(--tap);border:1px solid var(--line);border-radius:12px;background:#111923;color:var(--text);
+  padding:8px 12px;font-weight:750;cursor:pointer;touch-action:manipulation;
+}
+button:active{transform:translateY(1px)}
+button.primary{background:linear-gradient(180deg,#168fc9,#0e6f9d);border-color:#2b9ed2}
+button.danger{border-color:#7d3940;color:#ffd8dc}
+button.icon{min-width:var(--tap);padding:8px}
+input,select{
+  width:100%;min-height:44px;background:#0f161e;color:var(--text);border:1px solid var(--line);
+  border-radius:11px;padding:8px 10px;font-size:16px;
+}
+input:focus,select:focus{outline:2px solid #5ec8ff55;border-color:var(--accent)}
+.app{
+  width:100%;height:100dvh;min-height:100dvh;display:flex;overflow:hidden;
+  padding-top:env(safe-area-inset-top);background:var(--bg);
+}
+.main{width:100%;min-width:0;min-height:0;display:flex;flex:1;flex-direction:column;overflow:hidden}
+.mobileTopbar{
+  flex:0 0 auto;background:#10171ef2;border-bottom:1px solid var(--line);backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);z-index:20;padding:8px 8px 7px;
+}
+.topline{display:flex;align-items:center;gap:8px;min-width:0}
+.topTitle{font-size:15px;font-weight:850;white-space:nowrap;letter-spacing:.01em}
+.viewStatus{margin-left:auto;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewrow{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:6px;align-items:center;margin-top:7px}
+.tabs{
+  display:flex;gap:5px;overflow-x:auto;min-width:0;padding:0 1px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1 0 48px;min-height:40px;padding:6px 9px;font-size:12px;border-radius:10px}
+.tabs button.active{background:#123c52;border-color:#4eb0dd;color:#fff}
+.canvasWrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#080c11}
+.canvasWrap.dragover{box-shadow:inset 0 0 0 2px var(--accent)}
+svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.canvasControls{
+  position:absolute;z-index:10;top:8px;left:8px;right:8px;display:flex;align-items:end;gap:6px;
+  pointer-events:none;
+}
+.canvasControls .field{pointer-events:auto;min-width:0}
+.canvasControls .plane{flex:1 1 120px;max-width:180px}
+.canvasControls .direction{flex:0 1 142px;max-width:150px}
+.field label{display:block;font-size:10px;color:var(--muted);margin:0 0 3px 3px;font-weight:700}
+.canvasControls input,.canvasControls select{
+  min-height:38px;height:38px;padding:5px 8px;background:#101820e8;font-size:14px;backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.floating{
+  position:absolute;z-index:10;left:8px;bottom:8px;display:flex;gap:5px;background:#101820e8;
+  border:1px solid var(--line);padding:5px;border-radius:13px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.floating button{min-height:40px;height:40px;min-width:40px;padding:6px 9px;font-size:13px}
+.selection{
+  position:absolute;z-index:12;left:8px;right:8px;bottom:8px;display:none;gap:5px;align-items:center;
+  background:#101820f2;border:1px solid var(--line);padding:6px;border-radius:14px;box-shadow:var(--shadow);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.selection.show{display:flex}
+.selectionLabel{font-size:11px;color:var(--muted);min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selection button{min-height:40px;padding:6px 9px;font-size:11px}
+.mobileDock{
+  flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));
+  background:#10171ef7;border-top:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:25;
+}
+.mobileDock button{min-height:50px;padding:6px 8px;font-size:12px}
+.mobileDock button strong{display:block;font-size:13px}
+.sheetBackdrop{
+  display:block;position:fixed;inset:0;z-index:40;background:#0008;opacity:0;pointer-events:none;transition:opacity .18s ease;
+}
+.sheetBackdrop.show{opacity:1;pointer-events:auto}
+.sidebar{
+  position:fixed;z-index:50;left:0;right:0;bottom:0;width:100%;max-height:72dvh;overflow:auto;
+  background:#141b23;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;
+  padding:0 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -18px 60px #000b;
+  transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.sidebar.open{transform:translateY(0)}
+.sheetHeader{
+  position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;background:#141b23f5;
+  padding:7px 0 9px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.sheetHandle{position:absolute;left:50%;top:5px;transform:translateX(-50%);width:40px;height:4px;border-radius:99px;background:#536272}
+.sheetTitle{font-size:16px;font-weight:850;padding-top:7px}
+.sheetHeader .spacer{flex:1}
+.sheetHeader button{min-width:42px;min-height:42px;padding:5px 9px}
+.desktopBrand{display:none}
+.sheetPanel{display:none;padding:4px 0 2px}
+.sheetPanel.active{display:block}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.card h3{margin:0 0 10px;font-size:14px}
+.sub,.hint,.status{color:var(--muted);font-size:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.parts{display:flex;flex-direction:column;gap:8px}
+.part{background:#0f161e;border:1px solid var(--line);border-radius:12px;padding:10px;cursor:grab}
+.part.disabled{opacity:.45}
+.partTop{display:flex;justify-content:space-between;gap:8px;font-weight:800;font-size:13px}
+.partMeta{font-size:11px;color:var(--muted);margin-top:4px}
+.partActions{margin-top:8px}
+.partActions button{min-height:42px;padding:6px 8px;font-size:12px}
+.toast{
+  position:absolute;z-index:80;top:10px;left:50%;transform:translateX(-50%) translateY(-8px);background:#101820f4;
+  border:1px solid var(--line);padding:9px 12px;border-radius:11px;font-size:12px;display:none;max-width:min(90vw,360px);
+  box-shadow:var(--shadow)
+}
+.toast.show{display:block;transform:translateX(-50%)}
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:330px minmax(0,1fr);padding-bottom:0}
+  .main{grid-column:2;grid-row:1}
+  .mobileTopbar{padding:8px 12px}
+  .topTitle{display:none}
+  .viewrow{grid-template-columns:46px minmax(320px,560px) 46px;justify-content:center}
+  .tabs button{flex:1 1 auto}
+  .mobileDock{display:none}
+  .sheetBackdrop{display:none!important}
+  .sidebar{
+    grid-column:1;grid-row:1;position:relative;left:auto;right:auto;bottom:auto;transform:none!important;width:330px;max-height:none;height:100%;
+    border:0;border-right:1px solid var(--line);border-radius:0;padding:16px;box-shadow:none;background:var(--panel);overflow:auto;
+  }
+  .sheetHeader{display:none}
+  .desktopBrand{display:block;margin-bottom:14px}
+  .desktopBrand .brand{font-size:20px;font-weight:850}
+  .desktopBrand .sub{margin-top:3px}
+  .sheetPanel,.sheetPanel.active{display:block;padding:0}
+  .canvasControls{left:12px;right:auto;width:360px}
+  .floating{left:12px;bottom:12px}
+  .selection{left:auto;right:12px;bottom:12px;max-width:650px}
+}
+@media (max-width:380px){
+  .grid3{grid-template-columns:1fr 1fr 1fr}
+  .canvasControls .direction{max-width:126px}
+  .viewStatus{display:none}
+  .tabs button{flex-basis:44px;padding-inline:6px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-hidden="true">
+    <div class="desktopBrand" id="desktop-brand">
+      <div class="brand">Blueprint Builder</div>
+      <div class="sub">Standalone synchronized-view prototype</div>
+    </div>
+    <div class="sheetHeader">
+      <div class="sheetHandle" aria-hidden="true"></div>
+      <div class="sheetTitle" id="sheet-title">Parts</div>
+      <div class="spacer"></div>
+      <button class="icon" id="sheet-close" aria-label="Close tools">Done</button>
+    </div>
+    <section class="sheetPanel" data-sheet-panel="setup">
+      <div class="card">
+        <h3>Blueprint Setup</h3>
+        <div class="grid3">
+          <div class="field"><label for="bp-width">Width (ft)</label><input id="bp-width" type="number" min="1" value="20" inputmode="decimal"></div>
+          <div class="field"><label for="bp-depth">Depth (ft)</label><input id="bp-depth" type="number" min="1" value="20" inputmode="decimal"></div>
+          <div class="field"><label for="bp-height">Height (ft)</label><input id="bp-height" type="number" min="1" value="10" inputmode="decimal"></div>
+        </div>
+        <button class="primary" id="apply-blueprint" style="margin-top:8px;width:100%">Apply Blueprint Size</button>
+        <div class="hint" style="margin-top:8px">One shared X/Y/Z model. Every view uses real inches.</div>
+      </div>
+    </section>
+    <section class="sheetPanel" data-sheet-panel="tube">
+      <div class="card">
+        <h3>Add Tube</h3>
+        <div class="field"><label for="profile">Tube size</label><select id="profile"><option value="2x2">2" × 2" × 1/8" wall</option><option value="3x3">3" × 3" × 1/8" wall</option><option value="2x6">2" × 6" × 1/8" wall</option></select></div>
+        <div class="grid2" style="margin-top:8px">
+          <div class="field"><label for="part-length">Length (in)</label><input id="part-length" type="number" min="0.01" step="0.125" value="72" inputmode="decimal"></div>
+          <div class="field"><label for="part-qty">Quantity</label><input id="part-qty" type="number" min="1" value="4" inputmode="numeric"></div>
+        </div>
+        <button class="primary" id="add-part" style="margin-top:8px;width:100%">Add to Parts</button>
+      </div>
+    </section>
+    <section class="sheetPanel active" data-sheet-panel="parts">
+      <div class="card">
+        <h3>Parts</h3>
+        <div class="parts" id="parts-list"></div>
+        <div class="hint" style="margin-top:8px">Tap Place, then tap the grid. Desktop can also drag parts directly onto the drawing.</div>
+      </div>
+    </section>
+  </aside>
+  <div class="sheetBackdrop" id="sheet-backdrop"></div>
+
+  <main class="main">
+    <header class="mobileTopbar" id="mobile-topbar">
+      <div class="topline">
+        <div class="topTitle">Blueprint Builder</div>
+        <div class="viewStatus" id="view-status"></div>
+      </div>
+      <div class="viewrow">
+        <button class="icon" id="rotate-view-left" aria-label="Rotate Left">↺</button>
+        <div class="tabs" id="view-tabs" aria-label="Blueprint view">
+          <button class="active" data-view="top">Top</button>
+          <button data-view="wallA">A</button>
+          <button data-view="wallB">B</button>
+          <button data-view="wallC">C</button>
+          <button data-view="wallD">D</button>
+        </div>
+        <button class="icon" id="rotate-view-right" aria-label="Rotate Right">↻</button>
+      </div>
+    </header>
+
+    <div class="canvasWrap" id="canvas-wrap">
+      <div class="canvasControls">
+        <div class="field plane"><label id="plane-label" for="placement-plane">Elevation</label><input id="placement-plane" value="0&quot;" inputmode="decimal"></div>
+        <div class="field direction"><label for="placement-axis">Direction</label><select id="placement-axis"><option value="h">Horizontal</option><option value="v">Vertical</option></select></div>
+      </div>
+      <svg id="blueprint" xmlns="http://www.w3.org/2000/svg" aria-label="Blueprint drafting surface">
+        <defs>
+          <pattern id="grid1" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0L0 0 0 1" fill="none" stroke="var(--grid1)" stroke-width=".08"/></pattern>
+          <pattern id="grid3" width="3" height="3" patternUnits="userSpaceOnUse"><path d="M3 0L0 0 0 3" fill="none" stroke="var(--grid3)" stroke-width=".14"/></pattern>
+          <pattern id="grid12" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M12 0L0 0 0 12" fill="none" stroke="var(--grid12)" stroke-width=".22"/></pattern>
+        </defs>
+        <g id="scene"></g>
+      </svg>
+      <div class="floating">
+        <button id="zoom-out" aria-label="Zoom Out">−</button>
+        <button id="zoom-label" aria-label="Fit drawing">100%</button>
+        <button id="zoom-in" aria-label="Zoom In">+</button>
+        <button id="fit-view">Fit</button>
+      </div>
+      <div class="selection" id="selection-bar">
+        <span id="selection-label" class="selectionLabel"></span>
+        <button id="rotate-member">Rotate</button>
+        <button id="rotate-face">Face</button>
+        <button class="danger" id="delete-member">Delete</button>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <nav class="mobileDock" id="mobile-dock" aria-label="Blueprint tools">
+      <button id="drawer-btn"><strong>Parts</strong>Place stock</button>
+      <button id="add-tube-dock"><strong>Add Tube</strong>Size & qty</button>
+      <button id="setup-dock"><strong>Blueprint Setup</strong>Workspace</button>
+    </nav>
+  </main>
+</div>
+(()=>{'use strict';
 const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id),PROFILES={'2x2':{id:'2x2',label:'2 x 2 x 1/8',short:'2 × 2',a:2,b:2,wall:.125},'3x3':{id:'3x3',label:'3 x 3 x 1/8',short:'3 × 3',a:3,b:3,wall:.125},'2x6':{id:'2x6',label:'2 x 6 x 1/8',short:'2 × 6',a:2,b:6,wall:.125}};
 const state={workspace:{width:240,depth:240,height:120},view:'top',plane:{top:0,wallA:0,wallB:0,wallC:240,wallD:240},parts:[],members:[],selectedMemberId:null,armedPartId:null,dragPartId:null,viewport:{u:0,v:0,w:240,h:240},pan:null,move:null,snap:null,nextPart:1,nextMember:1};
 const VIEW_AXES={top:{u:'x',v:'y',hidden:'z',horizontal:'x',vertical:'y',planeLabel:'Elevation',uSign:1},wallA:{u:'x',v:'z',hidden:'y',horizontal:'x',vertical:'z',planeLabel:'Depth',uSign:1},wallB:{u:'y',v:'z',hidden:'x',horizontal:'y',vertical:'z',planeLabel:'X Offset',uSign:-1},wallC:{u:'x',v:'z',hidden:'y',horizontal:'x',vertical:'z',planeLabel:'Depth',uSign:-1},wallD:{u:'y',v:'z',hidden:'x',horizontal:'y',vertical:'z',planeLabel:'X Offset',uSign:1}};
@@ -30,7 +277,7 @@ function memberProjection(m,view=state.view){const s=viewSpec(view),p0=projectPo
 function memberFitsWorkspace(m){const e=memberEnd(m);return[m,e].every(p=>p.x>=0&&p.y>=0&&p.z>=0&&p.x<=state.workspace.width&&p.y<=state.workspace.depth&&p.z<=state.workspace.height)}
 function addPart(profile,length,qty){qty=Number(qty);length=Number(length);if(!PROFILES[profile]||!(length>0)||!Number.isInteger(qty)||qty<1)return null;const p={id:'p'+state.nextPart++,profile,length,remaining:qty,total:qty};state.parts.push(p);renderParts();return p}
 function addPartFromForm(){const len=Number($('part-length').value),qty=Number($('part-qty').value);if(!(len>0)||!Number.isFinite(len)||!Number.isInteger(qty)||qty<1)return toast('Enter tube length in inches and a whole-number quantity.');addPart($('profile').value,len,qty)}
-function renderParts(){const root=$('parts-list');root.innerHTML='';if(!state.parts.length){root.innerHTML='<div class="hint">No staged parts yet.</div>';return}for(const part of state.parts){const p=PROFILES[part.profile],el=document.createElement('div');el.className='part'+(part.remaining<1?' disabled':'');el.draggable=part.remaining>0;el.dataset.partId=part.id;el.innerHTML=`<div class="partTop"><span>${p.label}</span><span>${part.remaining} remaining</span></div><div class="partMeta">${formatTubeLength(part.length)} · ${part.total} created</div><div class="partActions"><button data-place="${part.id}" ${part.remaining<1?'disabled':''}>Place</button></div>`;el.addEventListener('dragstart',e=>{if(part.remaining<1)return e.preventDefault();state.dragPartId=part.id;e.dataTransfer.setData('text/plain',part.id)});root.appendChild(el)}root.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>{state.armedPartId=b.dataset.place;toast('Part armed. Tap the grid to place it.');if(innerWidth<860)$('sidebar').classList.remove('open')})}
+function renderParts(){const root=$('parts-list');root.innerHTML='';if(!state.parts.length){root.innerHTML='<div class="hint">No staged parts yet.</div>';return}for(const part of state.parts){const p=PROFILES[part.profile],el=document.createElement('div');el.className='part'+(part.remaining<1?' disabled':'');el.draggable=part.remaining>0;el.dataset.partId=part.id;el.innerHTML=`<div class="partTop"><span>${p.label}</span><span>${part.remaining} remaining</span></div><div class="partMeta">${formatTubeLength(part.length)} · ${part.total} created</div><div class="partActions"><button data-place="${part.id}" ${part.remaining<1?'disabled':''}>Place</button></div>`;el.addEventListener('dragstart',e=>{if(part.remaining<1)return e.preventDefault();state.dragPartId=part.id;e.dataTransfer.setData('text/plain',part.id)});root.appendChild(el)}root.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>{state.armedPartId=b.dataset.place;toast('Part armed. Tap the grid to place it.');if(isMobileLayout())closeSheet()})}
 function setPlaneFromInput(){const n=parseMeasurement($('placement-plane').value),s=viewSpec();if(n===null||n<0||n>s.hiddenLen){toast(`Placement plane must be between 0 and ${formatMeasurement(s.hiddenLen)}.`);return false}state.plane[state.view]=n;return true}
 function hiddenCompatible(a,b,view){const s=viewSpec(view),h=a[s.hidden],e=memberEnd(b);if(b.axis===s.hidden)return h>=Math.min(b[s.hidden],e[s.hidden])-.01&&h<=Math.max(b[s.hidden],e[s.hidden])+.01;const cm=crossMap(b),half=(cm[s.hidden]||0)/2;return h>=b[s.hidden]-half-.01&&h<=b[s.hidden]+half+.01}
 function snapCandidate(c,moving,view=state.view){let best={u:Math.round(c.u),v:Math.round(c.v),type:'grid',dist:Infinity},threshold=Math.max(2,Math.min(8,state.viewport.w/90));for(const m of state.members){if(moving&&m.id===moving.id||moving&&!hiddenCompatible(moving,m,view))continue;const p=memberProjection(m,view);if(p.type==='line'){for(const ep of[{u:p.u0,v:p.v0},{u:p.u1,v:p.v1}]){const d=Math.hypot(c.u-ep.u,c.v-ep.v);if(d<threshold&&d<best.dist)best={...ep,type:'endpoint',dist:d}}const dx=p.u1-p.u0,dy=p.v1-p.v0,l2=dx*dx+dy*dy;if(l2){const t=clamp(((c.u-p.u0)*dx+(c.v-p.v0)*dy)/l2,0,1),u=p.u0+t*dx,v=p.v0+t*dy,d=Math.hypot(c.u-u,c.v-v);if(d<threshold*.75&&d<best.dist)best={u:Math.round(u),v:Math.round(v),type:'edge',dist:d}}}else{const d=Math.hypot(c.u-p.u,c.v-p.v);if(d<threshold&&d<best.dist)best={u:Math.round(p.u),v:Math.round(p.v),type:'endpoint',dist:d}}}state.snap=best.type==='grid'?null:best;return best}
@@ -48,8 +295,13 @@ function rotateMemberFace(id){const m=state.members.find(x=>x.id===id);if(!m||m.
 function deleteMember(id){const i=state.members.findIndex(x=>x.id===id);if(i<0)return false;const[m]=state.members.splice(i,1),p=state.parts.find(x=>x.id===m.sourcePart);if(p)p.remaining++;if(state.selectedMemberId===id)state.selectedMemberId=null;renderParts();renderBlueprint();return true}
 function setView(view){if(!VIEW_AXES[view])return false;state.view=view;document.querySelectorAll('#view-tabs [data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));$('placement-plane').value=formatMeasurement(state.plane[view]);fitView();return true}
 function rotateViewRight(){const a=['wallA','wallB','wallC','wallD'],i=a.indexOf(state.view);return setView(i<0?'wallA':a[(i+1)%4])}
+function rotateViewLeft(){const a=['wallA','wallB','wallC','wallD'],i=a.indexOf(state.view);return setView(i<0?'wallD':a[(i+3)%4])}
+function isMobileLayout(){return matchMedia('(max-width: 899px)').matches}
+function setSheetMode(mode){const valid=['parts','tube','setup'];if(!valid.includes(mode))mode='parts';document.querySelectorAll('[data-sheet-panel]').forEach(p=>p.classList.toggle('active',p.dataset.sheetPanel===mode));const title={parts:'Parts',tube:'Add Tube',setup:'Blueprint Setup'}[mode];$('sheet-title').textContent=title;$('sidebar').dataset.mode=mode;return mode}
+function openSheet(mode='parts'){setSheetMode(mode);$('sidebar').classList.add('open');$('sheet-backdrop').classList.add('show');$('sidebar').setAttribute('aria-hidden','false')}
+function closeSheet(){$('sidebar').classList.remove('open');$('sheet-backdrop').classList.remove('show');if(isMobileLayout())$('sidebar').setAttribute('aria-hidden','true')}
 function applyBlueprint(){const old=state.workspace,width=Number($('bp-width').value)*12,depth=Number($('bp-depth').value)*12,height=Number($('bp-height').value)*12;if(![width,depth,height].every(n=>n>0&&Number.isFinite(n)))return toast('Blueprint dimensions must be positive.');state.workspace={width,depth,height};state.plane.top=clamp(state.plane.top,0,height);state.plane.wallA=clamp(state.plane.wallA,0,depth);state.plane.wallB=clamp(state.plane.wallB,0,width);state.plane.wallC=state.plane.wallC===old.depth?depth:clamp(state.plane.wallC,0,depth);state.plane.wallD=state.plane.wallD===old.width?width:clamp(state.plane.wallD,0,width);state.members=state.members.filter(m=>memberFitsWorkspace(m));$('placement-plane').value=formatMeasurement(state.plane[state.view]);fitView();renderParts()}
 function debugSnapProbe({view,moving,targetMemberId}){const t=state.members.find(m=>m.id===targetMemberId);if(!t)return{type:'grid'};const saved=state.members;state.members=[t];const r=snapCandidate(projectPoint(moving,view),moving,view);state.members=saved;state.snap=null;return r}
-$('add-part').onclick=addPartFromForm;$('apply-blueprint').onclick=applyBlueprint;$('drawer-btn').onclick=()=>$('sidebar').classList.toggle('open');$('placement-plane').onchange=()=>{if(setPlaneFromInput())renderBlueprint()};$('view-tabs').onclick=e=>{const b=e.target.closest('[data-view]');if(b)setView(b.dataset.view)};$('rotate-view-right').onclick=rotateViewRight;$('rotate-member').onclick=()=>rotateMemberInView(state.selectedMemberId);$('rotate-face').onclick=()=>rotateMemberFace(state.selectedMemberId);$('delete-member').onclick=()=>deleteMember(state.selectedMemberId);$('fit-view').onclick=fitView;$('zoom-in').onclick=()=>setZoom(.8);$('zoom-out').onclick=()=>setZoom(1.25);$('zoom-label').onclick=fitView;
-const wrap=$('canvas-wrap');wrap.ondragover=e=>{e.preventDefault();wrap.classList.add('dragover')};wrap.ondragleave=()=>wrap.classList.remove('dragover');wrap.ondrop=e=>{e.preventDefault();wrap.classList.remove('dragover');const p=currentSvgPoint(e);commitPlacement(e.dataTransfer.getData('text/plain')||state.dragPartId,p.u,p.v)};$('blueprint').onpointerdown=e=>{if(e.target.closest('[data-member-id]'))return;const p=currentSvgPoint(e);if(state.armedPartId)return commitPlacement(state.armedPartId,p.u,p.v);state.selectedMemberId=null;state.pan={x:e.clientX,y:e.clientY,orig:{...state.viewport}};$('blueprint').setPointerCapture(e.pointerId);renderBlueprint()};$('blueprint').onpointermove=e=>{if(state.move){const m=state.members.find(x=>x.id===state.move.id),p=currentSvgPoint(e),s=viewSpec(),du=p.u-state.move.start.u,dv=p.v-state.move.start.v,trial={...m};trial[s.u]=state.move.orig[s.u]+du*s.uSign;trial[s.v]=state.move.orig[s.v]+dv;const sn=snapCandidate(projectPoint(trial),trial,state.view);trial[s.u]=modelUFromScreen(sn.u);trial[s.v]=sn.v;if(memberFitsWorkspace(trial))Object.assign(m,trial);return renderBlueprint()}if(state.pan){const r=$('blueprint').getBoundingClientRect(),dx=(e.clientX-state.pan.x)/r.width*state.viewport.w,dy=(e.clientY-state.pan.y)/r.height*state.viewport.h;state.viewport.u=state.pan.orig.u-dx;state.viewport.v=state.pan.orig.v-dy;renderBlueprint()}};$('blueprint').onpointerup=e=>{state.move=null;state.pan=null;state.snap=null;try{$('blueprint').releasePointerCapture(e.pointerId)}catch{}renderBlueprint()};$('blueprint').addEventListener('wheel',e=>{e.preventDefault();setZoom(e.deltaY>0?1.12:.88,currentSvgPoint(e))},{passive:false});window.onresize=renderBlueprint;
-renderParts();fitView();window.BlueprintMockup={state,PROFILES,parseMeasurement,formatMeasurement,formatTubeLength,addPart,placeMember,projectPoint,projectMember:memberProjection,renderBlueprint,rotateMemberInView,rotateMemberFace,deleteMember,snapCandidate,memberFitsWorkspace,setZoom,fitView,setView,rotateViewRight,debugSnapProbe};})();</script></body></html>
+$('add-part').onclick=addPartFromForm;$('apply-blueprint').onclick=applyBlueprint;$('drawer-btn').onclick=()=>openSheet('parts');$('add-tube-dock').onclick=()=>openSheet('tube');$('setup-dock').onclick=()=>openSheet('setup');$('sheet-close').onclick=closeSheet;$('sheet-backdrop').onclick=closeSheet;$('placement-plane').onchange=()=>{if(setPlaneFromInput())renderBlueprint()};$('view-tabs').onclick=e=>{const b=e.target.closest('[data-view]');if(b)setView(b.dataset.view)};$('rotate-view-right').onclick=rotateViewRight;$('rotate-view-left').onclick=rotateViewLeft;$('rotate-member').onclick=()=>rotateMemberInView(state.selectedMemberId);$('rotate-face').onclick=()=>rotateMemberFace(state.selectedMemberId);$('delete-member').onclick=()=>deleteMember(state.selectedMemberId);$('fit-view').onclick=fitView;$('zoom-in').onclick=()=>setZoom(.8);$('zoom-out').onclick=()=>setZoom(1.25);$('zoom-label').onclick=fitView;
+const wrap=$('canvas-wrap');wrap.ondragover=e=>{e.preventDefault();wrap.classList.add('dragover')};wrap.ondragleave=()=>wrap.classList.remove('dragover');wrap.ondrop=e=>{e.preventDefault();wrap.classList.remove('dragover');const p=currentSvgPoint(e);commitPlacement(e.dataTransfer.getData('text/plain')||state.dragPartId,p.u,p.v)};$('blueprint').onpointerdown=e=>{if(e.target.closest('[data-member-id]'))return;const p=currentSvgPoint(e);if(state.armedPartId)return commitPlacement(state.armedPartId,p.u,p.v);state.selectedMemberId=null;state.pan={x:e.clientX,y:e.clientY,orig:{...state.viewport}};$('blueprint').setPointerCapture(e.pointerId);renderBlueprint()};$('blueprint').onpointermove=e=>{if(state.move){const m=state.members.find(x=>x.id===state.move.id),p=currentSvgPoint(e),s=viewSpec(),du=p.u-state.move.start.u,dv=p.v-state.move.start.v,trial={...m};trial[s.u]=state.move.orig[s.u]+du*s.uSign;trial[s.v]=state.move.orig[s.v]+dv;const sn=snapCandidate(projectPoint(trial),trial,state.view);trial[s.u]=modelUFromScreen(sn.u);trial[s.v]=sn.v;if(memberFitsWorkspace(trial))Object.assign(m,trial);return renderBlueprint()}if(state.pan){const r=$('blueprint').getBoundingClientRect(),dx=(e.clientX-state.pan.x)/r.width*state.viewport.w,dy=(e.clientY-state.pan.y)/r.height*state.viewport.h;state.viewport.u=state.pan.orig.u-dx;state.viewport.v=state.pan.orig.v-dy;renderBlueprint()}};$('blueprint').onpointerup=e=>{state.move=null;state.pan=null;state.snap=null;try{$('blueprint').releasePointerCapture(e.pointerId)}catch{}renderBlueprint()};$('blueprint').addEventListener('wheel',e=>{e.preventDefault();setZoom(e.deltaY>0?1.12:.88,currentSvgPoint(e))},{passive:false});window.onresize=()=>{if(!isMobileLayout()){closeSheet();$('sidebar').setAttribute('aria-hidden','false')}renderBlueprint()};
+setSheetMode('parts');if(isMobileLayout())$('sidebar').setAttribute('aria-hidden','true');renderParts();fitView();window.BlueprintMockup={state,PROFILES,parseMeasurement,formatMeasurement,formatTubeLength,addPart,placeMember,projectPoint,projectMember:memberProjection,renderBlueprint,rotateMemberInView,rotateMemberFace,deleteMember,snapCandidate,memberFitsWorkspace,setZoom,fitView,setView,rotateViewRight,rotateViewLeft,openSheet,closeSheet,debugSnapProbe};})();</script></body></html>
