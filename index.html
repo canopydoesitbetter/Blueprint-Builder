@@ -84,7 +84,7 @@ svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-web
 .selection button{min-height:40px;padding:6px 9px;font-size:11px}
 .mobileDock{
   flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));
-  background:#10171ef7;border-top:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:25;
+  background:#10171ef7;border-top:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:60;
 }
 .mobileDock button{min-height:50px;padding:6px 8px;font-size:12px}
 .mobileDock button strong{display:block;font-size:13px}
@@ -95,7 +95,7 @@ svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-web
 .sidebar{
   position:fixed;z-index:50;left:0;right:0;bottom:0;width:100%;max-height:72dvh;overflow:auto;
   background:#141b23;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;
-  padding:0 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -18px 60px #000b;
+  padding:0 14px calc(76px + env(safe-area-inset-bottom));box-shadow:0 -18px 60px #000b;
   transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);
 }
 .sidebar.open{transform:translateY(0)}
