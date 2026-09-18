@@ -136,9 +136,83 @@ test('out-of-bounds placement is rejected without consuming stock', async ({ pag
   expect(result.count).toBe(0);
 });
 
-test('mobile keeps parts in a drawer and exposes the drafting surface @mobile', async ({ page }) => {
-  await expect(page.locator('#drawer-btn')).toBeVisible();
+test('mobile-first shell gives the drafting canvas priority @mobile', async ({ page }) => {
+  await expect(page.locator('#mobile-dock')).toBeVisible();
+  await expect(page.locator('#desktop-brand')).toBeHidden();
+  await expect(page.locator('#blueprint')).toBeVisible();
+
+  const sizes = await page.evaluate(() => ({
+    width: innerWidth,
+    height: innerHeight,
+    scrollWidth: document.documentElement.scrollWidth,
+    canvas: document.querySelector('#canvas-wrap').getBoundingClientRect(),
+    topbar: document.querySelector('#mobile-topbar').getBoundingClientRect(),
+    dock: document.querySelector('#mobile-dock').getBoundingClientRect(),
+  }));
+
+  expect(sizes.scrollWidth).toBeLessThanOrEqual(sizes.width);
+  expect(sizes.canvas.height).toBeGreaterThan(sizes.height * 0.55);
+  expect(sizes.topbar.height).toBeLessThan(150);
+  expect(sizes.dock.height).toBeLessThan(110);
+});
+
+test('mobile tools open as a bottom sheet instead of a desktop sidebar @mobile', async ({ page }) => {
+  await expect(page.locator('#sidebar')).not.toHaveClass(/open/);
   await page.locator('#drawer-btn').click();
   await expect(page.locator('#sidebar')).toHaveClass(/open/);
+  await expect(page.locator('#sheet-backdrop')).toBeVisible();
+
+  const sheet = await page.locator('#sidebar').evaluate((el) => {
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    return { position: s.position, left: r.left, top: r.top, bottom: innerHeight - r.bottom, width: r.width, height: r.height };
+  });
+
+  expect(sheet.position).toBe('fixed');
+  expect(sheet.bottom).toBeLessThanOrEqual(2);
+  expect(sheet.width).toBeGreaterThan(300);
+  expect(sheet.height).toBeLessThan(page.viewportSize().height * 0.78);
+});
+
+test('mobile dock switches between Parts, Tube, and Setup sheets @mobile', async ({ page }) => {
+  await page.getByRole('button', { name: 'Add Tube' }).click();
+  await expect(page.locator('#sidebar')).toHaveClass(/open/);
+  await expect(page.locator('[data-sheet-panel="tube"]')).toBeVisible();
+  await expect(page.locator('[data-sheet-panel="parts"]')).toBeHidden();
+
+  await page.getByRole('button', { name: 'Blueprint Setup' }).click();
+  await expect(page.locator('[data-sheet-panel="setup"]')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Parts' }).click();
+  await expect(page.locator('[data-sheet-panel="parts"]')).toBeVisible();
+});
+
+test('iPhone WebKit opens with safe-area-aware mobile controls @ios', async ({ page }) => {
+  await expect(page.locator('#mobile-topbar')).toBeVisible();
+  await expect(page.locator('#mobile-dock')).toBeVisible();
+  await expect(page.locator('#view-tabs')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Rotate Right' })).toBeVisible();
   await expect(page.locator('#blueprint')).toBeVisible();
+
+  const meta = await page.locator('meta[name="viewport"]').getAttribute('content');
+  expect(meta).toContain('viewport-fit=cover');
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test('desktop browser expands tools without losing the mobile-first canvas model', async ({ page }) => {
+  await expect(page.locator('#desktop-brand')).toBeVisible();
+  await expect(page.locator('#sidebar')).toBeVisible();
+  await expect(page.locator('#mobile-dock')).toBeHidden();
+  await expect(page.locator('#blueprint')).toBeVisible();
+
+  const layout = await page.evaluate(() => ({
+    width: innerWidth,
+    sidebar: document.querySelector('#sidebar').getBoundingClientRect(),
+    canvas: document.querySelector('#canvas-wrap').getBoundingClientRect(),
+  }));
+
+  expect(layout.sidebar.width).toBeGreaterThanOrEqual(300);
+  expect(layout.canvas.width).toBeGreaterThan(layout.width * 0.5);
 });
